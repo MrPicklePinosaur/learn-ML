@@ -10,20 +10,20 @@ class DTree:
 	def fit(self,dataset): #this is where we build the tree
 		
 		#Find the best question to ask at this node
-		q = self.find_best_question(dataset)
+		q, info_gain = self.find_best_question(dataset)
 
-		#sorta inefficient but we are going to have to partition data again
-		part = q.partition(dataset)
-		true_set = part["true"]
-		false_set = part["false"]
+		if info_gain == 0: #if there is no point on asking questions
+			print("reached leaf with prediction:", dataset)
+			return PNode(dataset)
 
-		#TODO: DONT DO len(true_set), instead, check for unique features
-		if len(true_set) > 0: #if we havent reached a leaf
-			q.true_node = self.fit(true_set)
-		if len(false_set) > 0:
-			q.false_node = self.fit(false_set)
+		#partition data
+		true_set, false_set = q.partition(dataset)
 
-		return q
+		true_node = self.fit(true_set)
+		false_node = self.fit(false_set)
+
+		print("ask question:", q)
+		return QNode(q,true_node,false_node)
 
 	def predict(self):
 		pass
@@ -38,7 +38,7 @@ class DTree:
 		unq_labels = DTree.find_unique_features(labels)
 		
 		cur_gini = DTree.gini(dataset) #Find current impurity
-		best_gini = sys.maxsize
+		best_gain = -1*sys.maxsize
 		best_question = None
 
 		#now iterate through the labels and find out what the best question to ask is
@@ -46,18 +46,17 @@ class DTree:
 			q = Question(unq_labels[label],label)
 
 			#Now partition the data and find the gini impurity and info gain
-			part = q.partition(dataset)
-			true_set = part["true"]
-			false_set = part["false"]
+			true_set, false_set = q.partition(dataset)
 
 			#Deterime a weighted gini value for this question
 			new_gini = DTree.gini(true_set)*(len(true_set)/len(dataset)) + DTree.gini(false_set)*(len(false_set)/len(dataset))
 
-			if new_gini < best_gini: #NOTE: this might be wrong, try using info gain instead
-				best_gini = new_gini
+			info_gain = cur_gini-new_gini
+			if info_gain > best_gain:
+				best_gain = info_gain
 				best_question = q
 
-		return best_question
+		return best_question, best_gain
 
 	#helper methods
 	@staticmethod
@@ -103,9 +102,6 @@ class Question:
 		self.column = column #the column number for the feature
 		self.feature = feature #the specific feature
 
-		self.true_node = None
-		self.false_node = None
-
 	def __repr__(self):
 		return self.feature
 
@@ -116,18 +112,31 @@ class Question:
 			return example[self.column] == self.feature
 
 	def partition(self,data): #takes in a dataset and partitinos it into true and false
-		data_div = {"true" : [], "false": []}
+		true_set = []
+		false_set = []
 		for example in data:
 			if self.match(example):
-				data_div["true"].append(example)
+				true_set.append(example)
 			else:
-				data_div["false"].append(example)
-		return data_div
+				false_set.append(example)
+		return true_set, false_set
 
 	#helper methods
 	@staticmethod
 	def is_numeric(val):
 		return isinstance(val, int) or isinstance(val, float)
+
+class QNode: #points towards child nodes and also holds a question
+
+	def __init__(self,question,true_node,false_node):
+		self.question = question
+		self.true_node = true_node
+		self.false_node = false_node
+
+class PNode: #Leaf node, holds the prediction
+	
+	def __init__(self,dataset):
+		self.predict = dataset
 
 training_data = [
     ['Green', 3, 'Apple'],
