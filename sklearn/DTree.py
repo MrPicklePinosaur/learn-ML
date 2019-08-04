@@ -13,7 +13,7 @@ class DTree:
 		q, info_gain = self.find_best_question(dataset)
 
 		if info_gain == 0: #if there is no point on asking questions
-			print("reached leaf with prediction:", dataset)
+			#print("reached leaf with prediction:", dataset)
 			return PNode(dataset)
 
 		#partition data
@@ -22,11 +22,21 @@ class DTree:
 		true_node = self.fit(true_set)
 		false_node = self.fit(false_set)
 
-		print("ask question:", q)
-		return QNode(q,true_node,false_node)
+		#print("ask question:", q)
+		question_node = QNode(q,true_node,false_node)
+		self.root = question_node
+		return question_node
 
-	def predict(self):
-		pass
+	'''
+	def predict(self,test_set):
+		
+
+	def predict(self,test_set,curNode):
+
+		#Ask questions and split dataset
+		q = curNode.question #Get current question
+		true_set, false_set = q.partition
+	'''
 
 	def find_best_question(self,dataset):
 		if dataset == None or len(dataset) == 0: 
@@ -57,6 +67,13 @@ class DTree:
 				best_question = q
 
 		return best_question, best_gain
+
+	def __repr__(self):
+		self.toString(self.root,0)
+
+	def toString(self,curNode,recur_depth):
+		recur_depth += 1
+
 
 	#helper methods
 	@staticmethod
@@ -132,6 +149,7 @@ class QNode: #points towards child nodes and also holds a question
 		self.question = question
 		self.true_node = true_node
 		self.false_node = false_node
+
 
 class PNode: #Leaf node, holds the prediction
 	
