@@ -13,30 +13,40 @@ class DTree:
 		q, info_gain = self.find_best_question(dataset)
 
 		if info_gain == 0: #if there is no point on asking questions
-			#print("reached leaf with prediction:", dataset)
-			return PNode(dataset)
+			label_occurs = DTree.get_label_occurences(dataset)
+			return PNode(label_occurs) #node holds the probability of all possible predictions
 
 		#partition data
 		true_set, false_set = q.partition(dataset)
-
+		#print("true set:",true_set,"false_set",false_set)
 		true_node = self.fit(true_set)
 		false_node = self.fit(false_set)
 
-		#print("ask question:", q)
 		question_node = QNode(q,true_node,false_node)
 		self.root = question_node
+
 		return question_node
 
-	'''
-	def predict(self,test_set):
-		
+	def predict(self,test_point): #works for one point for now
+		return self.classify(test_point,self.root)
 
-	def predict(self,test_set,curNode):
+	#NOTE: either partition data and record how many test_points end up at each leaf, OR for-loop through all the test data
+	def classify(self,data_point,curNode):
 
-		#Ask questions and split dataset
-		q = curNode.question #Get current question
-		true_set, false_set = q.partition
-	'''
+		#if we have reached a leaf
+		if isinstance(curNode,PNode):
+			return curNode.predicts #return list of predictions
+
+		#otherwise keep partitioning the data
+		direct = curNode.question.match(data_point)
+
+		predict = None
+		if direct == True:
+			predict = self.classify(data_point,curNode.true_node)
+		else:
+			predict = self.classify(data_point,curNode.false_node)
+
+		return predict
 
 	def find_best_question(self,dataset):
 		if dataset == None or len(dataset) == 0: 
@@ -65,7 +75,6 @@ class DTree:
 			if info_gain > best_gain:
 				best_gain = info_gain
 				best_question = q
-
 		return best_question, best_gain
 
 	def __repr__(self):
@@ -94,7 +103,7 @@ class DTree:
 		return new_dataset
 
 	@staticmethod
-	def get_occurences(dataset): #returns a dict with the amount of occurences each element has
+	def get_label_occurences(dataset): #returns a dict with the amount of occurences each element has
 		occurs = {}
 		for row in dataset:
 			label = row[-1] #the label is always the last item in row 
@@ -106,7 +115,7 @@ class DTree:
 
 	@staticmethod
 	def gini(dataset): #input needs to be a 1D array of labels
-		occurs = DTree.get_occurences(dataset)
+		occurs = DTree.get_label_occurences(dataset)
 		impurity = 1
 		for label in occurs:
 			prob = occurs[label] / len(dataset)
@@ -150,22 +159,21 @@ class QNode: #points towards child nodes and also holds a question
 		self.true_node = true_node
 		self.false_node = false_node
 
+class PNode: #holds a list of possible labels
 
-class PNode: #Leaf node, holds the prediction
-	
-	def __init__(self,dataset):
-		self.predict = dataset
+	def __init__(self,predict_set):
+		self.predicts = predict_set
 
 training_data = [
     ['Green', 3, 'Apple'],
     ['Yellow', 3, 'Apple'],
     ['Red', 1, 'Grape'],
     ['Red', 1, 'Grape'],
+    ['Yellow', 4, 'Lemon'],
     ['Yellow', 3, 'Lemon'],
 ]
 
 dtree = DTree()
 dtree.fit(training_data)
 
-#print(DTree.get_occurences(training_data))
-#pprint(np.delete(training_data,len(training_data[0])-1,axis=1))
+print(dtree.predict(['Yellow', 3]))
