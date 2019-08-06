@@ -34,7 +34,9 @@ class DTree:
 	def predict(self,data_set): #works for one point for now
 		predicts = []
 		for data_point in data_set:
-			predicts.append(self.classify(data_point,self.root))
+			results = self.classify(data_point,self.root)
+			predicts.append(max(results, key=results.get))
+
 		return predicts
 
 	#NOTE: either partition data and record how many test_points end up at each leaf, OR for-loop through all the test data
@@ -180,6 +182,7 @@ class PNode: #holds a list of possible labels
 	def __init__(self,predict_set):
 		self.predicts = predict_set
 
+'''
 training_data = [
     ['Green', 3, 'Apple'],
     ['Yellow', 3, 'Apple'],
@@ -195,3 +198,35 @@ dtree.fit(training_data)
 print(dtree.predict([['Yellow', 3]]))
 
 print(dtree)
+'''
+
+iris = load_iris()
+
+#Split data into training and testing
+x = iris.data
+y = iris.target
+
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.5)
+
+#doing this cuz im too lazy to rewrite all the code to accomaddate 2 vars
+train_set = []
+for i in range(len(x_train)):
+	row = []
+	for n in x_train[i]:
+		row.append(n)
+	row.append(y_train[i])
+	train_set.append(row)
+
+
+#Create classifier
+clf_tree = DTree()
+
+#Train clasifiers
+clf_tree.fit(train_set)
+
+#Make predictions
+tree_result = clf_tree.predict(x_test)
+
+print(tree_result)
+#Determine accuracy
+print("tree accuracy:",accuracy_score(y_test,tree_result))
