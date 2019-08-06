@@ -2,6 +2,10 @@ import numpy as np
 import sys
 from pprint import *
 
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
 class DTree:
 
 	def __init__(self):
@@ -27,8 +31,11 @@ class DTree:
 
 		return question_node
 
-	def predict(self,test_point): #works for one point for now
-		return self.classify(test_point,self.root)
+	def predict(self,data_set): #works for one point for now
+		predicts = []
+		for data_point in data_set:
+			predicts.append(self.classify(data_point,self.root))
+		return predicts
 
 	#NOTE: either partition data and record how many test_points end up at each leaf, OR for-loop through all the test data
 	def classify(self,data_point,curNode):
@@ -75,14 +82,23 @@ class DTree:
 			if info_gain > best_gain:
 				best_gain = info_gain
 				best_question = q
+
 		return best_question, best_gain
 
 	def __repr__(self):
-		self.toString(self.root,0)
+		return self.toString(self.root,0)
 
 	def toString(self,curNode,recur_depth):
-		recur_depth += 1
+		if isinstance(curNode,PNode): #if we have reached a leaf
+			return "\t"*recur_depth + str(curNode.predicts) + "\n"
 
+		curString = "\t"*recur_depth + "Question: " + str(curNode.question) + "\n"
+		if curNode.true_node != None:
+			curString += ("True: " + self.toString(curNode.true_node,recur_depth+1))
+		if curNode.false_node != None:
+			curString += ("False: " + self.toString(curNode.false_node,recur_depth+1))
+
+		return curString
 
 	#helper methods
 	@staticmethod
@@ -129,7 +145,7 @@ class Question:
 		self.feature = feature #the specific feature
 
 	def __repr__(self):
-		return self.feature
+		return str(self.feature)
 
 	def match(self,example):
 		if Question.is_numeric(self.feature): #if the feature is numeric, ask inequality questions
@@ -176,4 +192,6 @@ training_data = [
 dtree = DTree()
 dtree.fit(training_data)
 
-print(dtree.predict(['Yellow', 3]))
+print(dtree.predict([['Yellow', 3]]))
+
+print(dtree)
