@@ -180,22 +180,6 @@ class PNode: #holds a list of possible labels
 		self.predicts = predict_set
 
 '''
-training_data = [
-    ['Green', 3, 'Apple'],
-    ['Yellow', 3, 'Apple'],
-    ['Red', 1, 'Grape'],
-    ['Red', 1, 'Grape'],
-    ['Yellow', 4, 'Lemon'],
-    ['Yellow', 3, 'Lemon'],
-]
-
-dtree = DTree()
-dtree.fit(training_data)
-
-print(dtree.predict([['Yellow', 3]]))
-
-print(dtree)
-'''
 
 iris = load_iris()
 
@@ -217,3 +201,4 @@ tree_result = clf_tree.predict(x_test)
 print(tree_result)
 #Determine accuracy
 print("tree accuracy:",accuracy_score(y_test,tree_result))
+'''
