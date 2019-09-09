@@ -9,8 +9,8 @@ from sklearn.metrics import accuracy_score
 
 class RForest:
 
-	NUM_OF_TREES = 16
-	SAMPLE_PERCENT = 0.5
+	NUM_OF_TREES = 1
+	#SAMPLE_PERCENT = 0.5
 
 	def __init__(self):
 		self.roots = []
@@ -19,18 +19,15 @@ class RForest:
 
 		index_list = [i for i in range(len(x_train))]
 
-		sample_size = int(len(index_list) * RForest.SAMPLE_PERCENT)
+		#sample_size = int(len(index_list) * RForest.SAMPLE_PERCENT)
 		
 		for i in range(RForest.NUM_OF_TREES):
 
-			#Grab a random sample of the training data
-			r.shuffle(index_list)
+			train_index_list = RForest.bag(index_list)
 
-			#Create a sample
-			train_index_list = [index_list[i] for i in range(sample_size)]
 			x_train_sample = [x_train[i] for i in train_index_list]
 			y_train_sample = [y_train[i] for i in train_index_list]
-			
+
 			self.roots.append(self.build_tree(x_train_sample,y_train_sample)) #Create a new tree
 
 	def build_tree(self,x_train,y_train):
@@ -86,6 +83,9 @@ class RForest:
 		#first find all unique features (this breaks if data is empty)
 		unq_features = RForest.find_unique_features(x_train)
 		
+		#Add some randomness in the features
+		#unq_features = RForest.randomize_features(unq_features)
+
 		cur_gini = RForest.gini(y_train) #Find current impurity
 		best_gain = -1*sys.maxsize
 		best_question = None
@@ -149,16 +149,22 @@ class RForest:
 	@staticmethod
 	def gini(y_train): #input needs to be a 1D array of labels
 		occurs = RForest.get_label_occurences(y_train)
-		impurity = 1
+		impurity = 11
 		for label in occurs:
 			prob = occurs[label] / len(y_train)
 			impurity -= prob**2
 		return impurity
 
 	@staticmethod
-	def bag(dataset): #randomizes the training dataset
-		replace_list = [dataset[r.randint(0,len(dataset)-1)] for i in range(len(data_set))]
-		return replace_list
+	def bag(dataset): #randomizes the training dataset (generates the indexes of those items)
+		replace_index_list = [r.randint(0,len(dataset)-1) for i in range(len(dataset))]
+		return replace_index_list
+
+	@staticmethod
+	def randomize_features(features):
+		r.shuffle(features)
+		features[:r.randint(0,len(features))]
+		return features
 
 class Question:
 
@@ -215,23 +221,19 @@ y = iris.target
 
 x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.5)
 
-
 #Create classifier
 clf_forest = RForest()
 
-data_set = [1,2,3,4,5,6,7,8]
-
-pprint(data_set)
+'''
+pprint(x_train)
 print("=-=-=-=-=-=")
-bagged = RForest.bag(data_set)
-bagged.sort()
-pprint(bagged)
-
+pprint(RForest.bag(x_train))
 '''
 #Train clasifiers
 clf_forest.fit(x_train,y_train)
 
 
+'''
 #Make predictions
 forest_result = clf_forest.predict(x_test)
 
