@@ -179,7 +179,7 @@ class PNode: #holds a list of possible labels
 	def __init__(self,predict_set):
 		self.predicts = predict_set
 
-'''
+
 
 iris = load_iris()
 
@@ -201,4 +201,3 @@ tree_result = clf_tree.predict(x_test)
 print(tree_result)
 #Determine accuracy
 print("tree accuracy:",accuracy_score(y_test,tree_result))
-'''

@@ -155,6 +155,11 @@ class RForest:
 			impurity -= prob**2
 		return impurity
 
+	@staticmethod
+	def bag(dataset): #randomizes the training dataset
+		replace_list = [dataset[r.randint(0,len(dataset)-1)] for i in range(len(data_set))]
+		return replace_list
+
 class Question:
 
 	def __init__(self,column,feature):
@@ -210,13 +215,23 @@ y = iris.target
 
 x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.5)
 
+
 #Create classifier
 clf_forest = RForest()
 
+data_set = [1,2,3,4,5,6,7,8]
+
+pprint(data_set)
+print("=-=-=-=-=-=")
+bagged = RForest.bag(data_set)
+bagged.sort()
+pprint(bagged)
+
+'''
 #Train clasifiers
 clf_forest.fit(x_train,y_train)
 
-'''
+
 #Make predictions
 forest_result = clf_forest.predict(x_test)
 
