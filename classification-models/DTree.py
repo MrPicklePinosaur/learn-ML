@@ -180,7 +180,7 @@ class PNode: #holds a list of possible labels
 		self.predicts = predict_set
 
 
-
+'''
 iris = load_iris()
 
 #Split data into training and testing
@@ -195,10 +195,11 @@ clf_tree = DTree()
 #Train clasifiers
 clf_tree.fit(x_train,y_train)
 
-print(clf_tree)
+#print(clf_tree)
 #Make predictions
 tree_result = clf_tree.predict(x_test)
 
-print(tree_result)
+#print(tree_result)
 #Determine accuracy
 print("tree accuracy:",accuracy_score(y_test,tree_result))
+'''

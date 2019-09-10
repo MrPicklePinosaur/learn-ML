@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 
 class RForest:
 
-	NUM_OF_TREES = 10
+	NUM_OF_TREES = 32
 	#SAMPLE_PERCENT = 0.5
 
 	def __init__(self):
@@ -183,6 +183,7 @@ class RForest:
 		key_list = [k for k in features] #for each key in dict
 		r.shuffle(key_list)
 		num_of_keys = r.randint(1,len(key_list)-1)
+		#num_of_keys = r.randint(int(len(key_list)*0.9),len(key_list)-1)
 		key_list = key_list[:num_of_keys]
 
 		return {k:features[k] for k in key_list}
@@ -233,7 +234,7 @@ class PNode: #holds a list of possible labels
 	def __init__(self,predict_set):
 		self.predicts = predict_set
 
-
+'''
 iris = load_iris()
 
 #Split data into training and testing
@@ -245,11 +246,6 @@ x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.5)
 #Create classifier
 clf_forest = RForest()
 
-'''
-pprint(x_train)
-print("=-=-=-=-=-=")
-pprint(RForest.bag(x_train))
-'''
 #Train clasifiers
 clf_forest.fit(x_train,y_train)
 
@@ -258,6 +254,7 @@ clf_forest.fit(x_train,y_train)
 #Make predictions
 forest_result = clf_forest.predict(x_test)
 
-print(forest_result)
+#print(forest_result)
 #Determine accuracy
 print("forest accuracy:",accuracy_score(y_test,forest_result))
+'''

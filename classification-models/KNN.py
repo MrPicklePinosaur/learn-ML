@@ -59,7 +59,7 @@ class KNN():
 			predicts.append(self.nearestK(row))
 		return predicts
 
-
+'''
 iris = load_iris()
 
 #Split data into training and testing
@@ -80,3 +80,4 @@ print(KNN_result)
 
 #Determine accuracy
 print("KNN accuracy:",accuracy_score(y_test,KNN_result))
+'''
