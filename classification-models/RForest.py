@@ -9,11 +9,11 @@ from sklearn.metrics import accuracy_score
 
 class RForest:
 
-	NUM_OF_TREES = 32
 	#SAMPLE_PERCENT = 0.5
 
-	def __init__(self):
+	def __init__(self,num_of_trees):
 		self.roots = []
+		self.num_of_trees = num_of_trees
 
 	def fit(self,x_train,y_train):
 
@@ -21,7 +21,7 @@ class RForest:
 
 		#sample_size = int(len(index_list) * RForest.SAMPLE_PERCENT)
 		
-		for i in range(RForest.NUM_OF_TREES):
+		for i in range(self.num_of_trees):
 
 			train_index_list = RForest.bag(index_list)
 
