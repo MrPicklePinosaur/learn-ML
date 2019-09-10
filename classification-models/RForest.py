@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 
 class RForest:
 
-	NUM_OF_TREES = 1
+	NUM_OF_TREES = 10
 	#SAMPLE_PERCENT = 0.5
 
 	def __init__(self):
@@ -51,9 +51,21 @@ class RForest:
 
 	def predict(self,x_test):
 		predicts = []
-		for data_point in x_test:
-			results = self.classify(data_point,self.root)
-			predicts.append(max(results, key=results.get))
+		for data_point in x_test: #For each testing datapoint
+			tree_predicts = [] #the outcome each individual tree comes to
+			for root in self.roots:
+				results = self.classify(data_point,root)
+				tree_predicts.append(max(results, key=results.get)) #find the key with the higehst value
+			
+			#Majority rules, the most chosen result wins
+			result_occurs = {}
+			for result in tree_predicts:
+				if result not in result_occurs:
+					result_occurs[result] = 1
+				else:
+					result_occurs[result] += 1
+
+			predicts.append(max(result_occurs,key=result_occurs.get))
 
 		return predicts
 
@@ -84,7 +96,7 @@ class RForest:
 		unq_features = RForest.find_unique_features(x_train)
 		
 		#Add some randomness in the features
-		#unq_features = RForest.randomize_features(unq_features)
+		unq_features = RForest.randomize_features(unq_features)
 
 		cur_gini = RForest.gini(y_train) #Find current impurity
 		best_gain = -1*sys.maxsize
@@ -112,6 +124,12 @@ class RForest:
 	def __repr__(self):
 		return self.roots
 		#self.toString(self.root,0)
+
+	def print_trees(self):
+		for i in range(len(self.roots)):
+			print("Tree #",i,"=-=-=-=-=-=")
+			root = self.roots[i]
+			print(self.toString(root,0))
 
 	def toString(self,curNode,recur_depth):
 		if isinstance(curNode,PNode): #if we have reached a leaf
@@ -162,9 +180,12 @@ class RForest:
 
 	@staticmethod
 	def randomize_features(features):
-		r.shuffle(features)
-		features[:r.randint(0,len(features))]
-		return features
+		key_list = [k for k in features] #for each key in dict
+		r.shuffle(key_list)
+		num_of_keys = r.randint(1,len(key_list)-1)
+		key_list = key_list[:num_of_keys]
+
+		return {k:features[k] for k in key_list}
 
 class Question:
 
@@ -232,12 +253,11 @@ pprint(RForest.bag(x_train))
 #Train clasifiers
 clf_forest.fit(x_train,y_train)
 
+#clf_forest.print_trees()
 
-'''
 #Make predictions
 forest_result = clf_forest.predict(x_test)
 
 print(forest_result)
 #Determine accuracy
 print("forest accuracy:",accuracy_score(y_test,forest_result))
-'''

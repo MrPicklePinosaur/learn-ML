@@ -195,6 +195,7 @@ clf_tree = DTree()
 #Train clasifiers
 clf_tree.fit(x_train,y_train)
 
+print(clf_tree)
 #Make predictions
 tree_result = clf_tree.predict(x_test)
 
