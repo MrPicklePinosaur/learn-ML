@@ -38,7 +38,7 @@ for i in range(AMOUNT_OF_TESTS):
 	DTree_accuracy = accuracy_score(y_test,clf_DTree.predict(x_test))
 	data["DTree"].append(DTree_accuracy)
 
-	clf_RForest = RForest(32)
+	clf_RForest = RForest(64)
 	clf_RForest.fit(x_train,y_train)
 	RForest_accuracy = accuracy_score(y_test,clf_RForest.predict(x_test))
 	data["RForest"].append(RForest_accuracy)

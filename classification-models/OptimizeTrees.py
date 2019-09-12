@@ -43,3 +43,6 @@ plt.plot([i for i in range(1,NUM_OF_FOREST_SIZES+1)],data)
 plt.xlabel("Number of Trees")
 plt.ylabel("Accuracy")
 plt.show()
+
+#concluded that number of trees doesnt really matter???
+#possibly try some other datasets
