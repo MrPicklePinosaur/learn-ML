@@ -34,6 +34,28 @@ class NNetwork:
 
 		return string
 
+	# 'squishification' functions
+	@staticmethod
+	def reLu(self,x):
+		return max(0,x)
+
+	@staticmethod
+	def derv_reLu(self,x):
+		if x < 0:
+			return 0
+		if x > 0:
+			return 1
+			
+		return 0.5 #can be 0, 0.5 or 1, more testing needed
+
+	@staticmethod
+	def softplus(self,x):
+		return np.log(1+np.exp(x))
+
+	@staticmethod
+	def derv_softplus(self,x): #the derivative of softplus happens to be sigmoid, neat!
+		return 1/(1+np.log(-x))
+
 net = NNetwork()
 blueprint = [784,16,16,10]
 net.build_network(blueprint)
