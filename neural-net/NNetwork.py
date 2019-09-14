@@ -1,7 +1,6 @@
 import random as r
 
 from Neuron import *
-from Synapsis import *
 
 class NNetwork:
 
@@ -24,21 +23,34 @@ class NNetwork:
 		for l in range(len(self.network)-1): #for each layer besides the last one
 			for cur_neuron in self.network[l]:
 				for next_neuron in self.network[l+1]:
-					synapsis = Synapsis() #initialized with random weight and bias
-					cur_neuron.connect_neuron(next_neuron,synapsis)
+					weight = r.randint(0,100)/100 #init with random weight
+					cur_neuron.connect_neuron(next_neuron,weight)
 
 	def fit(self,x_train):
-		for l in range(len(self.network)-1):
-			weight_matrix = np.array([s.weight for s in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))
-			neuron_vector = np.array([n for n in self.network[l].activation])
-			bias_vector = np.array([b.bias for b in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))
+		for img in x_train:
 
-		#the dot product of the weight matrix and the activation vector is equal to the weighted average vector
-		weightedAvg_vector = weight_matrix.dot(neuron_vector)
-		resultantNeuron_vector = weightedAvg_vector + bias_vector
+			#Plug input matrix into input layer
+			new_activation = matrix_to_array(img) 
+			for i in range(len(new_activation)):
+				self.network[0][i].activation = new_activation[i]
+
+			#Activate next layers
+			for l in range(len(self.network)-1): 
+
+				#calculate resultant activation
+				weight_matrix = np.array([w for w in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))
+				neuron_vector = np.array([n for n in self.network[l].activation])
+				bias_vector = np.array([n for b in self.network[l].bias])
+
+				#the dot product of the weight matrix and the activation vector is equal to the weighted average vector
+				weightedAvg_vector = weight_matrix.dot(neuron_vector) + bias_vector
+				resultant_activation = matrix_to_array(softplus(weightedAvg_vector)) #the activation of the next layer
+
+				#apply activatoin to next layer
+				for i in range(len(resultant_activation)):
+					self.network[l+1][i] = resultant_activation[i]
 
 	#def predict(self,):
-
 
 	def __repr__(self):
 		string = "Network info =-=-=-=-=-=-=-"
@@ -47,6 +59,10 @@ class NNetwork:
 			string += ("\n layer="+str(l)+", neuron_count="+str(len(layer)))
 
 		return string
+
+	@staticmethod
+	def matrix_to_array(self,matrix):
+		return matrix.flatten().tolist()
 
 	# 'squishification' functions
 	@staticmethod
