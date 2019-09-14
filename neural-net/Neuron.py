@@ -1,14 +1,15 @@
 import random as r
+
 class Neuron:
 
 	def __init__(self,layer,index):
 		self.layer = layer
 		self.index = index
 		self.activation = r.randint(0,100)/100 #init neuron with random activation
-		self.edges = {} #Stores the next neuron as the key, and the weight as the index
+		self.synapsis = {} #Stores the next neuron as the key, and the weight as the index
 
-	def connect_neuron(self,neuron,weight):
-		self.edges[neuron] = weight
+	def connect_neuron(self,neuron,synapsis):
+		self.synapsis[neuron] = synapsis
 
 	def set_activation(self,activation):
 		assert (0 <= activation and  activation <= 1), ("Invalid activation provided: "+str(activation))

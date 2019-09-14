@@ -1,6 +1,7 @@
 import random as r
 
 from Neuron import *
+from Synapsis import *
 
 class NNetwork:
 
@@ -23,16 +24,18 @@ class NNetwork:
 		for l in range(len(self.network)-1): #for each layer besides the last one
 			for cur_neuron in self.network[l]:
 				for next_neuron in self.network[l+1]:
-					weight = r.randint(0,100)/100 #generate with random weight between 0 and 1
-					cur_neuron.connect_neuron(next_neuron,weight)
+					synapsis = Synapsis() #initialized with random weight and bias
+					cur_neuron.connect_neuron(next_neuron,synapsis)
 
 	def fit(self,x_train):
 		for l in range(len(self.network)-1):
-			weight_matrix = np.array([w for w in self.network[l][n].edges.values()] for n in range(len(self.network[l])))
-			neuron_matrix = np.array([n for n in self.network[l].activation])
+			weight_matrix = np.array([s.weight for s in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))
+			neuron_vector = np.array([n for n in self.network[l].activation])
+			bias_vector = np.array([b.bias for b in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))
 
 		#the dot product of the weight matrix and the activation vector is equal to the weighted average vector
-		
+		weightedAvg_vector = weight_matrix.dot(neuron_vector)
+		resultantNeuron_vector = weightedAvg_vector + bias_vector
 
 	#def predict(self,):
 

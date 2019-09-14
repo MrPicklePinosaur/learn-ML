@@ -19,8 +19,11 @@ net.build_network(blueprint)
 #print(net.network)
 
 '''
-weight_matrix = [[w for w in net.network[0][n].edges.values()] for n in range(len(net.network[0]))]
-print(weight_matrix[0])
+weight_matrix = [[s.weight for s in net.network[0][n].synapsis.values()] for n in range(len(net.network[0]))]
+print(len(weight_matrix))
+
 neuron_matrix = [n.activation for n in net.network[0]]
 print(len(neuron_matrix))
 '''
+bias_vector = [[b.bias for b in net.network[0][n].synapsis.values()] for n in range(len(net.network[0]))]
+print(bias_vector[0])
