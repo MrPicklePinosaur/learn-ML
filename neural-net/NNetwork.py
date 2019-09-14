@@ -26,6 +26,17 @@ class NNetwork:
 					weight = r.randint(0,100)/100 #generate with random weight between 0 and 1
 					cur_neuron.connect_neuron(next_neuron,weight)
 
+	def fit(self,x_train):
+		for l in range(len(self.network)-1):
+			weight_matrix = np.array([w for w in self.network[l][n].edges.values()] for n in range(len(self.network[l])))
+			neuron_matrix = np.array([n for n in self.network[l].activation])
+
+		#the dot product of the weight matrix and the activation vector is equal to the weighted average vector
+		
+
+	#def predict(self,):
+
+
 	def __repr__(self):
 		string = "Network info =-=-=-=-=-=-=-"
 		for l in range(len(self.network)):
@@ -55,9 +66,3 @@ class NNetwork:
 	@staticmethod
 	def derv_softplus(self,x): #the derivative of softplus happens to be sigmoid, neat!
 		return 1/(1+np.log(-x))
-
-net = NNetwork()
-blueprint = [784,16,16,10]
-net.build_network(blueprint)
-print(net)
-print(net.network)
