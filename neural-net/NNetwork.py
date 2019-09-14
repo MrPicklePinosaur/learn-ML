@@ -1,4 +1,5 @@
 import random as r
+import numpy as np
 
 from Neuron import *
 
@@ -26,11 +27,20 @@ class NNetwork:
 					weight = r.randint(0,100)/100 #init with random weight
 					cur_neuron.connect_neuron(next_neuron,weight)
 
-	def fit(self,x_train):
-		for img in x_train:
+	def fit(self,x_train,y_train):
+		for i in range(len(x_train)):
+
+			result = self.apply_input(x_train[i])
+			expected = [1 if y_train[i] == i else 0 for i in range(10)] #convert expected output into an output layer list
+			avg_cost = cost_function(result,expected)
+			
+
+	def predict(self,digits):
+		for img in digits:
 
 			#Plug input matrix into input layer
-			new_activation = matrix_to_array(img) 
+			new_activation = NNetwork.matrix_to_array(img) 
+
 			for i in range(len(new_activation)):
 				self.network[0][i].activation = new_activation[i]
 
@@ -38,19 +48,21 @@ class NNetwork:
 			for l in range(len(self.network)-1): 
 
 				#calculate resultant activation
-				weight_matrix = np.array([w for w in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))
-				neuron_vector = np.array([n for n in self.network[l].activation])
-				bias_vector = np.array([n for b in self.network[l].bias])
+				weight_matrix = np.array(list([w for w in self.network[l][n].synapsis.values()] for n in range(len(self.network[l])))).transpose()
+				neuron_vector = np.array([[n.activation for n in self.network[l]]]).transpose()
+				bias_vector = np.array([[b.bias for b in self.network[l]]]).transpose()
 
 				#the dot product of the weight matrix and the activation vector is equal to the weighted average vector
-				weightedAvg_vector = weight_matrix.dot(neuron_vector) + bias_vector
-				resultant_activation = matrix_to_array(softplus(weightedAvg_vector)) #the activation of the next layer
+				weightedAvg_vector = np.dot(weight_matrix,neuron_vector)
+
+				#np.add(np.dot(weight_matrix,neuron_vector),bias_vector)
+				resultant_activation = NNetwork.matrix_to_array(NNetwork.softplus(weightedAvg_vector)) #the activation of the next layer
 
 				#apply activatoin to next layer
 				for i in range(len(resultant_activation)):
 					self.network[l+1][i] = resultant_activation[i]
 
-	#def predict(self,):
+		return self.network[-1]
 
 	def __repr__(self):
 		string = "Network info =-=-=-=-=-=-=-"
@@ -61,16 +73,16 @@ class NNetwork:
 		return string
 
 	@staticmethod
-	def matrix_to_array(self,matrix):
+	def matrix_to_array(matrix):
 		return matrix.flatten().tolist()
 
 	# 'squishification' functions
 	@staticmethod
-	def reLu(self,x):
+	def reLu(x):
 		return max(0,x)
 
 	@staticmethod
-	def derv_reLu(self,x):
+	def derv_reLu(x):
 		if x < 0:
 			return 0
 		if x > 0:
@@ -79,9 +91,18 @@ class NNetwork:
 		return 0.5 #can be 0, 0.5 or 1, more testing needed
 
 	@staticmethod
-	def softplus(self,x):
+	def softplus(x):
 		return np.log(1+np.exp(x))
 
 	@staticmethod
-	def derv_softplus(self,x): #the derivative of softplus happens to be sigmoid, neat!
+	def derv_softplus(x): #the derivative of softplus happens to be sigmoid, neat!
 		return 1/(1+np.log(-x))
+
+	@staticmethod
+	def cost_function(result,expected):
+		assert len(result) == len(expected), "Unable to determine cost, array lengths are different"
+		avg_cost = 0
+		for i in range(len(result)):
+			avg_cost += (results[i]-expected[i])**2
+		return avg_cost/len(results)
+

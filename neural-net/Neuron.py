@@ -13,7 +13,7 @@ class Neuron:
 		self.synapsis[neuron] = weight
 
 	def set_activation(self,activation):
-		assert (0 <= activation and  activation <= 1), ("Invalid activation provided: "+str(activation))
+		assert (0 <= activation and activation <= 1), ("Invalid activation provided: "+str(activation))
 		self.activation = activation
 
 	def __repr__(self):
