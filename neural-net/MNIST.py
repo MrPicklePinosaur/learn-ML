@@ -17,7 +17,9 @@ net.build_network(blueprint)
 #print(net)
 #print(net.network)
 
-net.fit(x_test)
+net.fit(x_test,y_test)
+
+
 '''
 weight_matrix = [[w for w in net.network[0][n].synapsis.values()] for n in range(len(net.network[0]))]
 print(len(weight_matrix))

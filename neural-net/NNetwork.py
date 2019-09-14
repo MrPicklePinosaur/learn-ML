@@ -7,6 +7,7 @@ class NNetwork:
 
 	def __init__(self):
 		self.network = [] #2d array, with each interior array being a layer in the network
+		self.batch_size = 16 
 
 	#input is a list of ints, where each item in array represents the amount of neurons in that layer
 	def build_network(self,blueprint):
@@ -24,16 +25,40 @@ class NNetwork:
 		for l in range(len(self.network)-1): #for each layer besides the last one
 			for cur_neuron in self.network[l]:
 				for next_neuron in self.network[l+1]:
-					weight = r.randint(0,100)/100 #init with random weight
+					weight = r.randint(-100,100)/100 #init with random weight
 					cur_neuron.connect_neuron(next_neuron,weight)
 
 	def fit(self,x_train,y_train):
+		#shuffle dataset`to employ stochastic descent
+		rand = [i for i in range(len(x_train))]
+		r.shuffle(rand)
+		x_train = [x_train[n] for n in rand]
+		y_train = [y_train[n] for n in rand]
+
 		for i in range(len(x_train)):
 
-			result = self.apply_input(x_train[i])
+			#determine how good the current prediction is
+			result = self.predict(x_train[i])
 			expected = [1 if y_train[i] == i else 0 for i in range(10)] #convert expected output into an output layer list
 			avg_cost = cost_function(result,expected)
+
+			#calculate how the current test case would like to affect the weights/biases
+			for output_node in self.network[-1]:
+				ratio_vector = weight_backprop(output_node,-1)
+
 			
+	def weight_backprop(self,root_neuron,layer_index): 
+		ratio_vector = []
+		for n in range(len(self.network[layer_index-1])): 
+			prev_neuron = self.network[layer_index-1][n] #for each node in previous layer
+
+			#Chain rule: the change in the cost function with respect to the activation of the node in the previous layer
+			ratio = prev_neuron.activation*derv_softplus(prev_neuron.activation*root_neuron.weight+root_neuron.bias)*2*(neuron.activation-root_neuron.weight)
+			ratio_vector.append(ratio)
+
+		# vector with height n where n is the number of neurons in previous layers
+		return np.array([ratio_vector])
+
 
 	def predict(self,digits):
 		for img in digits:
@@ -99,7 +124,7 @@ class NNetwork:
 		return 1/(1+np.log(-x))
 
 	@staticmethod
-	def cost_function(result,expected):
+	def cost_function(result,expected): #used as a measure on how sucessful our optimization is
 		assert len(result) == len(expected), "Unable to determine cost, array lengths are different"
 		avg_cost = 0
 		for i in range(len(result)):
