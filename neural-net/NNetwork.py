@@ -1,5 +1,6 @@
 import random as r
 import numpy as np
+import tensorflow as tf
 
 from Neuron import *
 
@@ -35,30 +36,54 @@ class NNetwork:
 		x_train = [x_train[n] for n in rand]
 		y_train = [y_train[n] for n in rand]
 
-		for i in range(len(x_train)):
+		result = self.predict(x_train[0])
+		#for i in range(len(x_train)):
 
-			#determine how good the current prediction is
-			result = self.predict(x_train[i])
-			expected = [1 if y_train[i] == i else 0 for i in range(10)] #convert expected output into an output layer list
-			avg_cost = cost_function(result,expected)
+		for l in range(len(self.network)-1,0,-1): #start from the output layer and work backwards
+			layer = self.network[l]
 
 			#calculate how the current test case would like to affect the weights/biases
-			for output_node in self.network[-1]:
-				ratio_vector = weight_backprop(output_node,-1)
+			avg_ratio_vector = np.array([len(layer)])
+			avg_bias_vector = np.array([len(layer)])
+			for output_node in layer:
+				ratio_vector, bias_vector = self.weight_backprop(output_node,l) #find components for gradient vector
+				avg_ratio_vector = np.add(avg_ratio_vector,ratio_vector)
+				bias_ratio_vector = np.add(avg_bias_vector,bias_vector)
 
-			
-	def weight_backprop(self,root_neuron,layer_index): 
+			avg_ratio_vector /= len(layer)
+			avg_bias_vector /= len(layer)
+
+
+
+		''' cost function stuff
+		#determine how good the current prediction is
+		result = self.predict(x_train[i])
+		expected = [1 if y_train[i] == i else 0 for i in range(10)] #convert expected output into an output layer list
+		avg_cost = NNetwork.cost_function(result,expected)
+		'''
+	
+	def backprop(self,root_neuron,layer_index): 
 		ratio_vector = []
-		for n in range(len(self.network[layer_index-1])): 
-			prev_neuron = self.network[layer_index-1][n] #for each node in previous layer
+		bias_vector = []
+		for prev_neuron in self.network[layer_index-1]: #for each node in previous layer
 
-			#Chain rule: the change in the cost function with respect to the activation of the node in the previous layer
-			ratio = prev_neuron.activation*derv_softplus(prev_neuron.activation*root_neuron.weight+root_neuron.bias)*2*(neuron.activation-root_neuron.weight)
+			#weight - Chain rule: the change in the cost function with respect to the activation of the node in the previous layer
+			ratio = prev_neuron.activation*NNetwork.derv_softplus(prev_neuron.activation*prev_neuron.synapsis[root_neuron]+root_neuron.bias)*2*(root_neuron.activation-prev_neuron.synapsis[root_neuron])
 			ratio_vector.append(ratio)
 
-		# vector with height n where n is the number of neurons in previous layers
-		return np.array([ratio_vector])
+			#bias
+			bias = NNetwork.derv_softplus(prev_neuron.activation*prev_neuron.synapsis[root_neuron]+root_neuron.bias)*2*(root_neuron.activation-prev_neuron.synapsis[root_neuron])
+			bias_vector.append(bias)
 
+		# vector with height n where n is the number of neuroins n previous layers
+		return np.array([ratio_vector]), np.array([bias_vector])
+
+
+	''' TODO
+	split train data into mini batches
+	create gradient vector
+	make it so the backprop algo can be modifyable
+	'''
 
 	def predict(self,digits):
 		for img in digits:
@@ -85,9 +110,9 @@ class NNetwork:
 
 				#apply activatoin to next layer
 				for i in range(len(resultant_activation)):
-					self.network[l+1][i] = resultant_activation[i]
+					self.network[l+1][i].activation = resultant_activation[i]
 
-		return self.network[-1]
+		return [n.activation for n in self.network[-1]]
 
 	def __repr__(self):
 		string = "Network info =-=-=-=-=-=-=-"
@@ -121,13 +146,24 @@ class NNetwork:
 
 	@staticmethod
 	def derv_softplus(x): #the derivative of softplus happens to be sigmoid, neat!
-		return 1/(1+np.log(-x))
+		return 1/(1+np.exp(-x))
 
 	@staticmethod
 	def cost_function(result,expected): #used as a measure on how sucessful our optimization is
 		assert len(result) == len(expected), "Unable to determine cost, array lengths are different"
 		avg_cost = 0
 		for i in range(len(result)):
-			avg_cost += (results[i]-expected[i])**2
-		return avg_cost/len(results)
+			avg_cost += (result[i]-expected[i])**2
+		return avg_cost/len(result)
 
+mnist = tf.keras.datasets.mnist
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR) #set log type
+
+(x_train, y_train),(x_test, y_test) = mnist.load_data()
+x_train, y_train, x_test, y_test = x_train/255.0, y_train/255.0, x_test/255.0, y_test/255.0
+
+net = NNetwork()
+blueprint = [784,16,16,10]
+net.build_network(blueprint)
+
+net.fit(x_test,y_test)

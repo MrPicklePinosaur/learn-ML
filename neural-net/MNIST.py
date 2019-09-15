@@ -8,8 +8,7 @@ mnist = tf.keras.datasets.mnist
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR) #set log type
 
 (x_train, y_train),(x_test, y_test) = mnist.load_data()
-
-#pprint(x_test[0])
+x_train, y_train, x_test, y_test = x_train/255.0, y_train/255.0, x_test/255.0, y_test/255.0
 
 net = NNetwork()
 blueprint = [784,16,16,10]
