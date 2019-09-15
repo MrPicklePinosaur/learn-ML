@@ -37,8 +37,12 @@ class NNetwork:
 		y_train = [y_train[n] for n in rand]
 
 		result = self.predict(x_train[0])
+
+		w, b, a = self.backprop(self.network[-1][0],len(self.network)-1)
+
 		#for i in range(len(x_train)):
 
+		'''
 		for l in range(len(self.network)-1,0,-1): #start from the output layer and work backwards
 			layer = self.network[l]
 
@@ -53,7 +57,7 @@ class NNetwork:
 			avg_ratio_vector /= len(layer)
 			avg_bias_vector /= len(layer)
 
-
+		'''
 
 		''' cost function stuff
 		#determine how good the current prediction is
@@ -62,10 +66,11 @@ class NNetwork:
 		avg_cost = NNetwork.cost_function(result,expected)
 		'''
 	
+	'''
 	def backprop(self,root_neuron,layer_index): 
 		ratio_vector = []
 		bias_vector = []
-		for prev_neuron in self.network[layer_index-1]: #for each node in previous layer
+		for prev_neuron in self.network[layer_index-1]: 
 
 			#weight - Chain rule: the change in the cost function with respect to the activation of the node in the previous layer
 			ratio = prev_neuron.activation*NNetwork.derv_softplus(prev_neuron.activation*prev_neuron.synapsis[root_neuron]+root_neuron.bias)*2*(root_neuron.activation-prev_neuron.synapsis[root_neuron])
@@ -77,6 +82,29 @@ class NNetwork:
 
 		# vector with height n where n is the number of neuroins n previous layers
 		return np.array([ratio_vector]), np.array([bias_vector])
+	'''
+
+	def backprop(self,cur_neuron,layer_index):
+		if (layer_index-1 == 0): 
+			#giant mess of calc
+			for prev_neuron in self.network[layer_index-1]: #for each node in previous layer
+				weight = prev_neuron.activation*NNetwork.derv_softplus(prev_neuron.activation*prev_neuron.synapsis[cur_neuron]+cur_neuron.bias)*2*(cur_neuron.activation-prev_neuron.synapsis[cur_neuron])
+				bias = NNetwork.derv_softplus(prev_neuron.activation*prev_neuron.synapsis[cur_neuron]+cur_neuron.bias)*2*(cur_neuron.activation-prev_neuron.synapsis[cur_neuron])
+				activation = prev_neuron.synapsis[cur_neuron]*NNetwork.derv_softplus(prev_neuron.activation*prev_neuron.synapsis[cur_neuron]+cur_neuron.bias)*2*(cur_neuron.activation-prev_neuron.synapsis[cur_neuron])
+
+			return weight, bias, activation
+
+		#merge previous results and bubble upwards
+		ratio_vector = []
+		bias_vector = []
+		activation_vector = []
+		for neuron in self.network[layer_index]: #for all nodes in current layer, match with all nodes in previous layer
+			w, b, a = self.backprop(neuron,layer_index-1)
+			ratio_vector.append(w)
+			bias_vector.append(b)
+			activation_vector.append(a)
+
+		return ratio_vector, bias_vector, activation_vector
 
 
 	''' TODO
