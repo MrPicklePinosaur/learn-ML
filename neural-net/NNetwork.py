@@ -36,9 +36,9 @@ class NNetwork:
 		x_train = [x_train[n] for n in rand]
 		y_train = [y_train[n] for n in rand]
 
-		result = self.predict(x_train[0])
+		result = self.predict(x_train[0]) #plug in a test value
 
-		w, b, a = self.backprop(self.network[-1][0],len(self.network)-1)
+		#w, b, a = self.backprop(self.network[-1][0],len(self.network)-1)
 
 		prev_layer = self.network[-1]
 
@@ -86,9 +86,17 @@ class NNetwork:
 		result = self.predict(x_train[i])
 		expected = [1 if y_train[i] == i else 0 for i in range(10)] #convert expected output into an output layer list
 		avg_cost = NNetwork.cost_function(result,expected)
+		:
 		'''
+
+	def backprop(self,neruon_index,layer_index):
+		w_vector = []
+		b_vector = []
+		a_list = []
+
+		#essentially we need to have the activations of the higher up levels without actually modifying the network itself
 	
-	
+	'''
 	def backprop(self,root_neuron,layer_index): 
 		weight_vector = []
 		bias_vector = []
@@ -111,7 +119,6 @@ class NNetwork:
 		return np.array([weight_vector]), np.array([bias_vector]), np.array([activation_vector])
 	
 
-	'''
 	def backprop(self,cur_neuron,layer_index):
 		if (layer_index-1 == 0): #stop explorin any deeper if we have no more layers above current
 			return None, None, None
@@ -222,6 +229,7 @@ class NNetwork:
 			avg_cost += (result[i]-expected[i])**2
 		return avg_cost/len(result)
 
+'''
 mnist = tf.keras.datasets.mnist
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR) #set log type
 
@@ -233,3 +241,12 @@ blueprint = [784,16,16,10]
 net.build_network(blueprint)
 
 net.fit(x_test,y_test)
+'''
+def backprop_weight(neuron_index,layer_index):
+ * [(aL-1 * derv_softplus(zL)) * (aL-2 * derv(softplus(zL-1))) ... (aL-N-1 * derv(softplus(zL-N)))] * 2(aL-N - y)
+
+prev_layer = [r.randint(0,100)/100 for i in range(16)]
+cur_layer = [r.randint(0,100)/100 for i in range(10)]
+
+for neuron in cur_layer:
+
